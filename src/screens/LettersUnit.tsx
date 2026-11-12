@@ -15,6 +15,7 @@ export default function LettersUnit() {
   const [step, setStep] = useState(0); // 0..n-1 letters, n = quiz, n+1 = done
   const [run, setRun] = useState(0);
   const [score, setScore] = useState<{ right: number; total: number }>();
+  const [ready, setReady] = useState<Set<string>>(new Set());
   const questions = useMemo(() => (group ? letterQuestions(group.id) : []), [group, run]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!group) return <Navigate to="/" replace />;
   const letters = group.letters.map((x) => LETTER_MAP[x]);
@@ -52,9 +53,13 @@ export default function LettersUnit() {
       title={`${group.title} · ${step + 1} of ${n}`}
       progress={step / (n + 1)}
       onBack={step > 0 ? () => setStep(step - 1) : undefined}
-      footer={<button className="btn" onClick={() => { setStep(step + 1); window.scrollTo(0, 0); }}>{step === n - 1 ? 'Start the quiz' : 'Next letter'}</button>}
+      footer={
+        <button className="btn" disabled={!ready.has(letter.id)} onClick={() => { setStep(step + 1); window.scrollTo(0, 0); }}>
+          {!ready.has(letter.id) ? 'Write every shape to continue' : step === n - 1 ? 'Start the quiz' : 'Next letter'}
+        </button>
+      }
     >
-      <LetterCard key={letter.id} letter={letter} />
+      <LetterCard key={letter.id} letter={letter} gated onComplete={() => setReady((r) => new Set(r).add(letter.id))} />
     </UnitShell>
   );
 }

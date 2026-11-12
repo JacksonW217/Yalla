@@ -153,7 +153,15 @@ h1, h2 { margin: 0; }
 .form { direction: ltr; border: 1.5px solid var(--line); background: var(--bg); border-radius: 14px; padding: 6px 4px 8px; display: flex; flex-direction: column; align-items: center; }
 .form .ar { font-size: 38px; line-height: 1.6; }
 .form span:last-child { font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.form { position: relative; }
 .form.on { border-color: var(--accent); background: var(--accent-soft); }
+.form.passed:not(.on) { border-color: #b8dcd3; }
+.form-check { position: absolute; top: 5px; right: 5px; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; }
+.shape-detail { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.context { margin-top: 10px; text-align: center; background: var(--bg); border-radius: 14px; padding: 4px 10px 10px; }
+.context .ar { line-height: 1.7; }
+.hl { color: var(--accent); }
+.btn.plain-link { background: none; color: var(--ink-2); height: 40px; font-size: 15px; font-weight: 500; text-decoration: underline; text-underline-offset: 3px; }
 .word { display: flex; align-items: center; gap: 14px; margin-top: 8px; }
 .word > div { flex: 1; }
 
