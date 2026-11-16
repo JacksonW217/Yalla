@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Ar, Page, Segmented, SpeakButton } from '../components/ui';
+import { Ar, Page, PageHeader, Segmented, SpeakButton } from '../components/ui';
 import { PHRASE_MAP } from '../data/lessons';
 import { syncCards } from '../lib/cards';
 import { copyText } from '../lib/clipboard';
@@ -73,7 +73,7 @@ export default function Settings() {
 
   return (
     <Page>
-      <header className="hero plain"><h1 className="large-title">Settings</h1></header>
+      <PageHeader title="Settings" back="/" gear={false} />
 
       <section className="section">
         <h2>Reading help</h2>

@@ -1,6 +1,6 @@
 import { Check, ChevronDown, Copy, ExternalLink } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { Page, Segmented } from '../components/ui';
+import { Page, PageHeader, Segmented } from '../components/ui';
 import { SCENARIOS, TUTOR_INSTRUCTIONS } from '../data/tutor';
 import { copyText } from '../lib/clipboard';
 import { db, setKV } from '../lib/db';
@@ -43,10 +43,7 @@ export default function Speak() {
 
   return (
     <Page>
-      <header className="hero plain">
-        <h1 className="large-title">Speak</h1>
-        <p className="sub">Practise real conversation with your Claude tutor. This builds a message from what you’ve learned so the tutor stays at your level.</p>
-      </header>
+      <PageHeader title="Speak" sub="Practise real conversation with your Claude tutor. This builds a message from what you’ve learned, so the tutor stays at your level." />
 
       <section className="card">
         <button className="row between plain-row" onClick={() => setShowSetup(!open)} aria-expanded={open}>

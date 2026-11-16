@@ -1,4 +1,5 @@
-import { Volume2 } from 'lucide-react';
+import { ArrowLeft, Settings as SettingsIcon, Volume2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useSettings } from '../lib/hooks';
 import { speak } from '../lib/speech';
@@ -58,5 +59,30 @@ export function ProgressBar({ value }: { value: number }) {
     <div className="bar" role="progressbar" aria-valuenow={Math.round(value * 100)} aria-valuemin={0} aria-valuemax={100}>
       <i style={{ width: `${Math.round(Math.min(1, Math.max(0, value)) * 100)}%` }} />
     </div>
+  );
+}
+
+/** Go back if there is somewhere to go back to, otherwise to `fallback`. */
+export function useBack(fallback = '/') {
+  const nav = useNavigate();
+  return () => ((window.history.state as { idx?: number } | null)?.idx ? nav(-1) : nav(fallback, { replace: true }));
+}
+
+/** Title bar for the main screens. Settings lives behind the gear. */
+export function PageHeader({ title, sub, eyebrow, back, gear = true, children }: { title: string; sub?: string; eyebrow?: ReactNode; back?: string; gear?: boolean; children?: ReactNode }) {
+  const goBack = useBack(back);
+  return (
+    <header className="page-head">
+      <div className="page-head-row">
+        {back && <button className="icon-btn" onClick={goBack} aria-label="Back"><ArrowLeft size={20} /></button>}
+        <div className="grow">
+          {eyebrow && <div className="eyebrow">{eyebrow}</div>}
+          <h1 className={back ? 'title' : 'large-title'}>{title}</h1>
+        </div>
+        {children}
+        {gear && <Link to="/settings" className="icon-btn" aria-label="Settings"><SettingsIcon size={20} /></Link>}
+      </div>
+      {sub && <p className="sub">{sub}</p>}
+    </header>
   );
 }

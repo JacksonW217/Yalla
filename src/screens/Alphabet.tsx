@@ -1,7 +1,7 @@
 import { ArrowLeft } from 'lucide-react';
-import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams } from 'react-router-dom';
 import { LetterCard } from '../components/LetterCard';
-import { Ar, Page } from '../components/ui';
+import { Ar, Page, PageHeader, useBack } from '../components/ui';
 import { LETTER_GROUPS, LETTER_MAP, LETTERS } from '../data/letters';
 import { useDone } from '../lib/hooks';
 import { MarksReference } from './MarksUnit';
@@ -11,10 +11,7 @@ export default function Alphabet() {
   const learned = new Set(LETTER_GROUPS.filter((g) => done?.has(`letters:${g.id}`)).flatMap((g) => g.letters));
   return (
     <Page>
-      <header className="hero plain">
-        <h1 className="large-title">Alphabet</h1>
-        <p className="sub">28 letters, read right to left. Tap any letter to hear it and practise writing it.</p>
-      </header>
+      <PageHeader title="Alphabet chart" back="/practice" sub="28 letters, read right to left. Tap any letter to hear it and practise writing it." />
       <div className="alpha-grid" dir="rtl">
         {LETTERS.map((l) => (
           <Link key={l.id} to={`/alphabet/${l.id}`} className={`alpha${learned.has(l.id) ? ' learned' : ''}`}>
@@ -34,17 +31,17 @@ export default function Alphabet() {
 
 export function LetterScreen() {
   const { id } = useParams();
-  const nav = useNavigate();
+  const back = useBack('/alphabet');
   const letter = id ? LETTER_MAP[id] : undefined;
   if (!letter) return <Navigate to="/alphabet" replace />;
   const i = LETTERS.indexOf(letter);
   return (
     <Page>
       <div className="row between" style={{ margin: '8px 0 12px' }}>
-        <button className="icon-btn" onClick={() => nav('/alphabet')} aria-label="Back to alphabet"><ArrowLeft size={20} /></button>
+        <button className="icon-btn" onClick={back} aria-label="Back to alphabet"><ArrowLeft size={20} /></button>
         <div className="row">
-          {LETTERS[i - 1] && <Link className="btn sm secondary" to={`/alphabet/${LETTERS[i - 1].id}`}>Previous</Link>}
-          {LETTERS[i + 1] && <Link className="btn sm secondary" to={`/alphabet/${LETTERS[i + 1].id}`}>Next</Link>}
+          {LETTERS[i - 1] && <Link replace className="btn sm secondary" to={`/alphabet/${LETTERS[i - 1].id}`}>Previous</Link>}
+          {LETTERS[i + 1] && <Link replace className="btn sm secondary" to={`/alphabet/${LETTERS[i + 1].id}`}>Next</Link>}
         </div>
       </div>
       <LetterCard key={letter.id} letter={letter} />
