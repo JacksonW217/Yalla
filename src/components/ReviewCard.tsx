@@ -150,6 +150,7 @@ function PhraseCard({ card, onGrade, say }: Props & { say: boolean }) {
             {say ? <Ar className="phrase-ar">{me.ar}</Ar> : <div className="quiz-word">{p.en}</div>}
             <div className="guide">{say ? me.guide : p.guide}</div>
             {p.f && !(p.self && settings.gender) && <div className="foot">{p.self ? 'If you’re a woman' : 'To a woman'}: {p.f.guide}</div>}
+            {p.ex && <div className="foot">e.g. {p.ex.guide} — {p.ex.en}</div>}
             {formal && p.egypt && <div className="foot">In Egypt: {p.egypt}</div>}
             <div className="row" style={{ justifyContent: 'center' }}>{p.check && <Check />}<FlagButton id={p.id} /></div>
             <SpeakButton text={p.ar} label="Hear it" />

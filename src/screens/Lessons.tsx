@@ -1,9 +1,10 @@
-import { Check, ChevronRight, Lock, MessagesSquare } from 'lucide-react';
+import { Check, ChevronRight, Lock, MessagesSquare, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Page, PageHeader, ProgressBar } from '../components/ui';
 import { DIALOGUES } from '../data/dialogues';
 import { LESSON_MAP, PATH, unitKey } from '../data/lessons';
-import { useDone } from '../lib/hooks';
+import { CORE } from '../data/core';
+import { useCore, useDone } from '../lib/hooks';
 import { describe, type Skill } from '../lib/units';
 
 const GROUPS: { skill: Skill; title: string; blurb: string }[] = [
@@ -15,7 +16,8 @@ const GROUPS: { skill: Skill; title: string; blurb: string }[] = [
 /** Every lesson, grouped by skill. The recommended next one is marked. */
 export default function Lessons() {
   const done = useDone();
-  if (!done) return <Page><div className="spinner" /></Page>;
+  const core = useCore();
+  if (!done || !core) return <Page><div className="spinner" /></Page>;
   const next = PATH.find((u) => !done.has(unitKey(u)));
   return (
     <Page>
@@ -51,6 +53,25 @@ export default function Lessons() {
           </section>
         );
       })}
+      <section className="section">
+        <div className="row between group-head">
+          <h2>Core words</h2>
+          <span className="foot">{Math.min(core.learned, CORE.length)} of {CORE.length}</span>
+        </div>
+        <p className="sub group-sub">The most useful everyday Egyptian words, a few each day, each in a sentence.</p>
+        <ProgressBar value={Math.min(core.learned, CORE.length) / CORE.length} />
+        <div className="list" style={{ marginTop: 12 }}>
+          <Link to="/words" className="li">
+            <span className="li-ic next"><Sparkles size={18} /></span>
+            <span className="grow">
+              <span className="li-title">{core.learned >= CORE.length ? 'All core words learned' : 'Today’s new words'}</span>
+              <span className="foot">{core.today > 0 ? `${core.today} learned today` : 'Part of Today’s session, or start here'}</span>
+            </span>
+            <ChevronRight size={18} className="chev" />
+          </Link>
+        </div>
+      </section>
+
       <section className="section">
         <div className="row between group-head">
           <h2>Conversations</h2>

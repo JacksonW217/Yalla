@@ -11,7 +11,7 @@ import { record } from '../lib/db';
 import { lessonQuestions } from '../lib/questions';
 import { shuffle } from '../lib/util';
 
-function PhraseCard({ p }: { p: Phrase }) {
+export function PhraseCard({ p }: { p: Phrase }) {
   const who = p.self ? ['If you’re a man', 'If you’re a woman'] : ['To a man', 'To a woman'];
   return (
     <div className="card phrase">
@@ -48,6 +48,16 @@ function PhraseCard({ p }: { p: Phrase }) {
           <SpeakButton text={p.reply.ar} small />
         </div>
       )}
+      {p.ex && (
+        <div className="phrase-line reply">
+          <div className="grow">
+            <div className="foot">In a sentence · {p.ex.en}</div>
+            <Ar className="phrase-ar">{p.ex.ar}</Ar>
+            <div><Guide>{p.ex.guide}</Guide></div>
+          </div>
+          <SpeakButton text={p.ex.ar} small />
+        </div>
+      )}
       {p.note && <p className="note">{p.note}</p>}
       {p.egypt && <p className="note egypt"><b>In Egypt:</b> {p.egypt}</p>}
       {p.formal && (
@@ -58,7 +68,7 @@ function PhraseCard({ p }: { p: Phrase }) {
 }
 
 /** Active recall: see the English, say it aloud, then reveal and grade yourself. */
-function Recall({ phrases, reading, onDone }: { phrases: Phrase[]; reading?: boolean; onDone: () => void }) {
+export function Recall({ phrases, reading, onDone }: { phrases: Phrase[]; reading?: boolean; onDone: () => void }) {
   // Reading lessons go round twice: first with vowel marks, then without.
   const [pass, setPass] = useState(1);
   const [settings] = useSettings();

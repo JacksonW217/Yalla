@@ -107,6 +107,25 @@ export const DIALOGUES: Dialogue[] = [
       you('إن شاء الله', 'in shaa2 allaah', 'God willing'),
     ],
   },
+  {
+    id: 'plans',
+    title: 'Making plans',
+    setting: 'A friend asks what you’re doing tomorrow and suggests dinner.',
+    them: 'Your friend',
+    requires: ['time', 'gym', 'verbs-future'],
+    lines: [
+      them('هتعمل إيه بكرة؟', 'hati3mil eeh bukra?', 'What are you doing tomorrow?'),
+      you('هروح الجيم الصبح', 'haruu7 el-jim eS-Sub7', 'I’ll go to the gym in the morning'),
+      them('وبعدين؟', 'wi ba3deen?', 'And then?'),
+      you('بعدين عندي شغل', 'ba3deen 3andi shughl', 'Then I have work'),
+      them('عايز تاكل معايا بالليل؟', '3aayez taakul ma3aaya bil-leel?', 'Do you want to eat with me in the evening?', 'ma3aaya = with me'),
+      you('أيوه، يا ريت. فين؟', 'aywa, ya reet. feen?', 'Yes, I’d love to. Where?', 'ya reet = I wish / I’d love to'),
+      them('فيه مطعم كويس جنب البيت', 'fiih maT3am kwayyis gamb el-beet', 'There’s a good restaurant next to the house', 'maT3am = restaurant, gamb = next to'),
+      you('تمام. الساعة كام؟', 'tamaam. es-saa3a kaam?', 'Great. What time?'),
+      them('الساعة تمانية', 'es-saa3a tamanya', 'At eight o’clock'),
+      you('ماشي، هشوفك بكرة', 'maashi, hashuufak bukra', 'OK, I’ll see you tomorrow'),
+    ],
+  },
 ];
 
 export const DIALOGUE_MAP: Record<string, Dialogue> = Object.fromEntries(DIALOGUES.map((d) => [d.id, d]));

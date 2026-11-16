@@ -4,8 +4,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Ar, Page, PageHeader } from '../components/ui';
 import { LETTER_GROUPS } from '../data/letters';
 import { LESSON_MAP, PATH, unitKey } from '../data/lessons';
-import { buildPlan } from '../lib/cards';
-import { useCards, useDone, useSettings, useToday } from '../lib/hooks';
+import { CORE } from '../data/core';
+import { buildPlan, nextCoreWords } from '../lib/cards';
+import { useCards, useCore, useDone, useSettings, useToday } from '../lib/hooks';
 import { addDays, dayKey, isDue } from '../lib/srs';
 import { describe } from '../lib/units';
 
@@ -19,15 +20,17 @@ export default function Today() {
   const minutes = settings.minutes;
   const next = done && PATH.find((u) => !done.has(unitKey(u)));
   const due = useMemo(() => (cards ?? []).filter((c) => isDue(c)), [cards]);
-  const plan = useMemo(() => buildPlan(minutes, due, next || undefined), [minutes, due, next]);
-  if (!done || !cards) return <Page><div className="spinner" /></Page>;
+  const core = useCore();
+  const newWords = core ? nextCoreWords(core, settings.newWords).length : 0;
+  const plan = useMemo(() => buildPlan(minutes, due, next || undefined, undefined, newWords), [minutes, due, next, newWords]);
+  if (!done || !cards || !core) return <Page><div className="spinner" /></Page>;
 
   const lessonsDone = PATH.filter((u) => done.has(unitKey(u))).length;
   const letters = LETTER_GROUPS.filter((g) => done.has(`letters:${g.id}`)).reduce((n, g) => n + g.letters.length, 0);
-  const words = PATH.filter((u) => u.kind === 'lesson' && done.has(unitKey(u))).reduce((n, u) => n + LESSON_MAP[u.id].phrases.length, 0);
+  const words = PATH.filter((u) => u.kind === 'lesson' && done.has(unitKey(u))).reduce((n, u) => n + LESSON_MAP[u.id].phrases.length, 0) + Math.min(core.learned, CORE.length);
   const tomorrow = cards.filter((c) => c.due === addDays(dayKey(), 1)).length;
   const fresh = lessonsDone === 0 && !cards.length;
-  const start = () => nav(plan.cards.length ? `/review?m=${minutes}` : next ? describe(next).to : '/');
+  const start = () => nav(plan.cards.length ? `/review?m=${minutes}` : plan.words ? '/words' : next ? describe(next).to : '/');
   const date = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
   return (
@@ -51,14 +54,17 @@ export default function Today() {
           {plan.cards.length > 0 && (
             <li><b>Review {plan.cards.length} card{plan.cards.length === 1 ? '' : 's'}</b><span>about {plan.reviewMinutes} min{plan.dueTotal > plan.cards.length ? ` · ${plan.dueTotal - plan.cards.length} more due` : ''}</span></li>
           )}
+          {plan.words > 0 && (
+            <li><b>Learn {plan.words} new word{plan.words === 1 ? '' : 's'}</b><span>Core vocabulary · about {Math.max(1, Math.round(plan.words * 0.5))} min</span></li>
+          )}
           {plan.unit && (
             <li><b>New: {describe(plan.unit).title}</b><span>{describe(plan.unit).tag} · about {plan.unitMinutes} min</span></li>
           )}
-          {!plan.cards.length && !plan.unit && (
+          {!plan.cards.length && !plan.unit && !plan.words && (
             <li><b>{next ? 'Nothing fits at this length' : 'You’re all caught up'}</b><span>{next ? `Nothing is due for review. Pick a longer session for the next lesson (about ${describe(next).minutes} min).` : tomorrow ? `${tomorrow} cards are due tomorrow.` : 'No cards are due.'}</span></li>
           )}
         </ol>
-        {(plan.cards.length > 0 || plan.unit) && (
+        {(plan.cards.length > 0 || plan.unit || plan.words > 0) && (
           <button className="btn white" onClick={start}>{fresh ? 'Begin' : 'Start'} <ChevronRight size={18} /></button>
         )}
       </section>

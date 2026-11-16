@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Unit } from '../data/lessons';
-import { buildPlan, CARD_SECONDS } from './cards';
+import { CORE } from '../data/core';
+import { buildPlan, CARD_SECONDS, nextCoreWords } from './cards';
 import type { Card, CardKind } from './db';
 import { newSchedule } from './srs';
 
@@ -46,5 +47,26 @@ describe('daily plan', () => {
   it('puts the most overdue cards first', () => {
     const due = [card(1, 'letter-read', '2026-11-16'), card(2, 'letter-read', '2026-11-10'), card(3, 'letter-read', '2026-11-14')];
     expect(buildPlan(10, due, undefined).cards.map((c) => c.ref)).toEqual(['2', '3', '1']);
+  });
+});
+
+describe('new core words', () => {
+  it('respects the daily allowance and the end of the list', () => {
+    expect(nextCoreWords({ learned: 0, today: 0 }, 5).map((p) => p.id)).toEqual(CORE.slice(0, 5).map((p) => p.id));
+    expect(nextCoreWords({ learned: 5, today: 5 }, 5)).toHaveLength(0);
+    expect(nextCoreWords({ learned: 7, today: 2 }, 5)).toHaveLength(3);
+    expect(nextCoreWords({ learned: 7, today: 2 }, 0)).toHaveLength(0);
+    expect(nextCoreWords({ learned: CORE.length - 2, today: 0 }, 5)).toHaveLength(2);
+    expect(nextCoreWords({ learned: CORE.length, today: 0 }, 5)).toHaveLength(0);
+  });
+
+  it('are planned after reviews and before the lesson, when there is time', () => {
+    const due = Array.from({ length: 300 }, (_, i) => card(i, 'letter-write'));
+    expect(buildPlan(5, due, lesson, undefined, 5).words).toBe(0); // reviews fill a 5-minute session
+    const p = buildPlan(20, [], letters, undefined, 5);
+    expect(p.words).toBe(5);
+    expect(p.unit).toEqual(letters);
+    expect(buildPlan(5, [], undefined, undefined, 5).words).toBe(5);
+    expect(buildPlan(20, [], letters, undefined, 0).words).toBe(0);
   });
 });

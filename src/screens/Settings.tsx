@@ -89,6 +89,19 @@ export default function Settings() {
       </section>
 
       <section className="section">
+        <h2>New words</h2>
+        <div className="card">
+          <div className="row between">
+            <div>
+              <div className="li-title">New core words per day</div>
+              <div className="foot">Every new word adds reviews for weeks afterwards, so a few a day is the sustainable pace.</div>
+            </div>
+            <Segmented value={String(s.newWords)} onChange={(v) => set({ newWords: Number(v) })} options={[{ value: '0', label: 'Off' }, { value: '5', label: '5' }, { value: '10', label: '10' }]} />
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
         <h2>Reading help</h2>
         <div className="card">
           <div className="row between">

@@ -38,3 +38,12 @@ export function useFlags(): Record<string, string> {
     }, []) ?? {}
   );
 }
+
+/** Core-vocabulary progress: words learned so far, and how many were introduced today. */
+export function useCore() {
+  return useLiveQuery(async () => {
+    const learned = Number((await db.kv.get('core:learned'))?.value ?? 0);
+    const today = Number((await db.kv.get(`core:${dayKey()}`))?.value ?? 0);
+    return { learned, today };
+  }, []);
+}

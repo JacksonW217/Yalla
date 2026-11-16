@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { form, LETTER_GROUPS, LETTER_MAP, LETTERS, MARKS } from './letters';
+import { CORE } from './core';
 import { DIALOGUES } from './dialogues';
 import { LESSON_MAP, LESSONS, mine, PATH, PHRASE_MAP, unitKey } from './lessons';
 
@@ -89,5 +90,22 @@ describe('speaker forms', () => {
     expect(mine(PHRASE_MAP.kwayyis, '').guide).toBe('kwayyis');
     expect(mine(PHRASE_MAP.ezzayyak, 'f').guide).toBe('ezzayyak?'); // depends on the listener, not the speaker
     expect(mine(PHRASE_MAP['3aayez'], 'f').guide).toBe('ana 3ayza ...');
+  });
+});
+
+describe('core words', () => {
+  it('have unique ids that never clash with lesson phrases, and an example each', () => {
+    const lessonIds = new Set(LESSONS.flatMap((l) => l.phrases.map((p) => p.id)));
+    expect(new Set(CORE.map((p) => p.id)).size).toBe(CORE.length);
+    for (const p of CORE) {
+      expect(p.id.startsWith('c-')).toBe(true);
+      expect(lessonIds.has(p.id)).toBe(false);
+      expect(PHRASE_MAP[p.id]).toBe(p);
+      expect(ARABIC.test(p.ar)).toBe(true);
+      expect(ARABIC.test(p.guide)).toBe(false);
+      expect(p.ex, p.id).toBeDefined();
+      expect(ARABIC.test(p.ex!.ar)).toBe(true);
+      expect(ARABIC.test(p.ex!.guide)).toBe(false);
+    }
   });
 });

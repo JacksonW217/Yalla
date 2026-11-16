@@ -12,6 +12,7 @@ import Review from './screens/Review';
 import Settings from './screens/Settings';
 import Speak from './screens/Speak';
 import Today from './screens/Today';
+import Words from './screens/Words';
 
 function Tabs() {
   const location = useLocation();
@@ -48,6 +49,7 @@ export default function App() {
         <Route path="/review" element={<Review />} />
         <Route path="/dialogue/:id" element={<DialogueScreen />} />
         <Route path="/type" element={<TypeDrill />} />
+        <Route path="/words" element={<Words />} />
         <Route path="/lesson/:id" element={<LessonScreen />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

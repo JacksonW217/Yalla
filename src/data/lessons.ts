@@ -10,7 +10,9 @@
  *   which case they depend on who is SPEAKING.
  */
 
+import { CORE } from './core';
 import { MORE_EGYPTIAN } from './egyptian2';
+import { BUILDING } from './egyptian3';
 
 export interface Phrase {
   id: string;
@@ -26,6 +28,8 @@ export interface Phrase {
   note?: string;
   /** Formal (Modern Standard) equivalent, when it differs. */
   formal?: { ar: string; guide: string };
+  /** A short sentence using the word, for core vocabulary. */
+  ex?: { ar: string; guide: string; en: string };
   /** How Egyptians say it, for formal words that differ in everyday speech. */
   egypt?: string;
   /** Author is not fully confident: verify with a second source. */
@@ -260,7 +264,7 @@ export const READING: Lesson[] = [
   },
 ];
 
-LESSONS.push(...READING, ...MORE_EGYPTIAN);
+LESSONS.push(...READING, ...MORE_EGYPTIAN, ...BUILDING);
 
 export const LESSON_MAP: Record<string, Lesson> = Object.fromEntries(LESSONS.map((l) => [l.id, l]));
 
@@ -294,14 +298,24 @@ export const PATH: Unit[] = [
   { kind: 'lesson', id: 'read3' },
   { kind: 'lesson', id: 'time' },
   { kind: 'lesson', id: 'smalltalk' },
+  { kind: 'lesson', id: 'verbs-now' },
+  { kind: 'lesson', id: 'numbers2' },
+  { kind: 'lesson', id: 'verbs-want' },
+  { kind: 'lesson', id: 'gym' },
+  { kind: 'lesson', id: 'verbs-past' },
+  { kind: 'lesson', id: 'numbers3' },
+  { kind: 'lesson', id: 'verbs-future' },
 ];
 
 export const unitKey = (u: Unit) => `${u.kind}:${u.id}`;
 
-export const PHRASE_MAP: Record<string, Phrase> = Object.fromEntries(LESSONS.flatMap((l) => l.phrases.map((p) => [p.id, p])));
+/** The core-vocabulary deck, presented like a lesson so cards and reviews treat it the same way. */
+export const CORE_LESSON: Lesson = { id: 'core', title: 'Core words', blurb: 'The most useful everyday words, a few each day.', minutes: 3, intro: [], phrases: CORE };
+
+export const PHRASE_MAP: Record<string, Phrase> = Object.fromEntries([...LESSONS, CORE_LESSON].flatMap((l) => l.phrases.map((p) => [p.id, p])));
 
 /** Phrase id → the lesson it belongs to. */
-export const PHRASE_LESSON: Record<string, Lesson> = Object.fromEntries(LESSONS.flatMap((l) => l.phrases.map((p) => [p.id, l])));
+export const PHRASE_LESSON: Record<string, Lesson> = Object.fromEntries([...LESSONS, CORE_LESSON].flatMap((l) => l.phrases.map((p) => [p.id, l])));
 
 /** Remove short-vowel marks, the way everyday Arabic is printed. */
 export const stripMarks = (ar: string) => ar.replace(/[\u064B-\u0652\u0670]/g, '');

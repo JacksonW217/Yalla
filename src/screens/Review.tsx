@@ -5,7 +5,8 @@ import { UnitShell } from '../components/UnitShell';
 import { Page } from '../components/ui';
 import { LETTER_GROUPS, LETTER_MAP } from '../data/letters';
 import { PATH, unitKey } from '../data/lessons';
-import { buildPlan, gradeCard, type Plan } from '../lib/cards';
+import { buildPlan, coreStatus, gradeCard, nextCoreWords, type Plan } from '../lib/cards';
+import { DEFAULT_SETTINGS, type Settings } from '../lib/db';
 import { db, type Card } from '../lib/db';
 import { useDone } from '../lib/hooks';
 import { dayKey } from '../lib/srs';
@@ -35,13 +36,14 @@ export default function Review() {
     void (async () => {
       if (drill) {
         const pool = shuffle((await db.cards.toArray()).filter((c) => (which === 'weak' ? isWeak(c) : drill.kinds.includes(c.kind)))).slice(0, 12);
-        setPlan({ minutes: 0, cards: pool, reviewMinutes: 0, dueTotal: pool.length, unitMinutes: 0 });
+        setPlan({ minutes: 0, cards: pool, reviewMinutes: 0, dueTotal: pool.length, words: 0, unitMinutes: 0 });
         setQueue(pool);
         return;
       }
       const due = await db.cards.where('due').belowOrEqual(dayKey()).toArray();
       const next = PATH.find((u) => !done.has(unitKey(u)));
-      const p = buildPlan(minutes, due, next);
+      const settings = { ...DEFAULT_SETTINGS, ...(((await db.kv.get('settings'))?.value as Partial<Settings>) ?? {}) };
+      const p = buildPlan(minutes, due, next, undefined, nextCoreWords(await coreStatus(), settings.newWords).length);
       setPlan(p);
       setQueue(p.cards);
     })();
@@ -67,12 +69,14 @@ export default function Review() {
           ) : (
             <p className="sub">Cards appear here the day after you finish a lesson, then come back at growing intervals.</p>
           )}
-          {plan.unit && (
-            <button className="btn" onClick={() => nav(unitLink(plan.unit!))}>Continue to today’s lesson · about {plan.unitMinutes} min</button>
-          )}
+          {plan.words > 0 ? (
+            <button className="btn" onClick={() => nav('/words', { replace: true })}>Continue: learn {plan.words} new words</button>
+          ) : plan.unit ? (
+            <button className="btn" onClick={() => nav(unitLink(plan.unit!), { replace: true })}>Continue to today’s lesson · about {plan.unitMinutes} min</button>
+          ) : null}
           {drill && <button className="btn" onClick={() => { setPlan(undefined); setCleared(0); setMissed(0); setRetry(new Set()); }}>Go again</button>}
           {more > 0 && !drill && <button className="btn secondary" onClick={() => { setPlan(undefined); setCleared(0); setMissed(0); setRetry(new Set()); }}>Review more</button>}
-          <button className={`btn${plan.unit || drill ? ' secondary' : ''}`} onClick={() => nav(drill ? '/practice' : '/', { replace: true })}>Done for now</button>
+          <button className={`btn${plan.unit || plan.words || drill ? ' secondary' : ''}`} onClick={() => nav(drill ? '/practice' : '/', { replace: true })}>Done for now</button>
         </div>
       </UnitShell>
     );

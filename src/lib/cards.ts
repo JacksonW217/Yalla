@@ -4,6 +4,7 @@
  * ways (recognise it, and produce it).
  */
 import { LETTER_GROUPS, MARKS } from '../data/letters';
+import { CORE } from '../data/core';
 import { LESSON_MAP, PATH, unitKey, type Unit } from '../data/lessons';
 import { db, setKV, type Card, type CardKind } from './db';
 import { addDays, dayKey, newSchedule, review, type Grade } from './srs';
@@ -36,6 +37,34 @@ async function addCards(u: Unit, due: string) {
   return fresh.length;
 }
 
+/** How far through the core-vocabulary deck the learner is, and how many they met today. */
+export async function coreStatus(): Promise<{ learned: number; today: number }> {
+  const learned = Number((await db.kv.get('core:learned'))?.value ?? 0);
+  const today = Number((await db.kv.get(`core:${dayKey()}`))?.value ?? 0);
+  return { learned: Math.min(learned, CORE.length), today };
+}
+
+/** The next core words to teach, given a daily allowance. */
+export function nextCoreWords(status: { learned: number; today: number }, perDay: number) {
+  const n = Math.max(0, Math.min(perDay - status.today, CORE.length - status.learned));
+  return CORE.slice(status.learned, status.learned + n);
+}
+
+/** Record that `count` more core words were learned and schedule their cards for tomorrow. */
+export async function learnCoreWords(count: number) {
+  const s = await coreStatus();
+  const words = CORE.slice(s.learned, s.learned + count);
+  if (!words.length) return;
+  const due = addDays(dayKey(), 1);
+  const fresh: Card[] = [];
+  for (const p of words)
+    for (const kind of ['phrase-say', 'phrase-read'] as const)
+      if (!(await db.cards.get(cardId(kind, p.id)))) fresh.push({ id: cardId(kind, p.id), kind, ref: p.id, created: dayKey(), ...newSchedule(due) });
+  if (fresh.length) await db.cards.bulkAdd(fresh);
+  await setKV('core:learned', s.learned + words.length);
+  await setKV(`core:${dayKey()}`, s.today + words.length);
+}
+
 /** Finish a unit: record it and schedule its cards to start tomorrow. */
 export async function markDone(key: string) {
   const first = !(await db.kv.get(`done:${key}`));
@@ -63,12 +92,17 @@ export async function gradeCard(card: Card, grade: Grade) {
 /** Roughly how long one card takes, in seconds. Writing is slowest. */
 export const CARD_SECONDS: Record<CardKind, number> = { 'letter-read': 6, 'mark-read': 6, 'phrase-read': 10, 'phrase-say': 12, 'letter-write': 20 };
 
+/** Minutes to learn one new core word. */
+export const WORD_MINUTES = 0.5;
+
 export interface Plan {
   minutes: number;
   /** Cards to review now, already ordered. */
   cards: Card[];
   reviewMinutes: number;
   dueTotal: number;
+  /** New core words to learn today, if there's time. */
+  words: number;
   /** A new lesson that fits in the remaining time. */
   unit?: Unit;
   unitMinutes: number;
@@ -93,7 +127,7 @@ const unitMinutes = (u: Unit) => (u.kind === 'lesson' ? LESSON_MAP[u.id].minutes
  * the expensive thing), capped at about half the time when a new lesson is
  * waiting, so you keep moving forward too.
  */
-export function buildPlan(minutes: number, due: Card[], nextUnit: Unit | undefined, today = dayKey()): Plan {
+export function buildPlan(minutes: number, due: Card[], nextUnit: Unit | undefined, today = dayKey(), newWords = 0): Plan {
   // Most overdue first, then mixed within the same day so kinds are interleaved.
   // The mix is a hash of the card and the date: stable all day (the home
   // screen and the session agree), different tomorrow.
@@ -108,7 +142,10 @@ export function buildPlan(minutes: number, due: Card[], nextUnit: Unit | undefin
     used += CARD_SECONDS[c.kind];
   }
   const reviewMinutes = Math.ceil(used / 60);
-  const left = minutes - used / 60;
+  let left = minutes - used / 60;
+  // New words are quick (about half a minute each) and come before a lesson.
+  const words = newWords > 0 && left >= 2 ? newWords : 0;
+  left -= words * WORD_MINUTES;
   const fits = !!nextUnit && left >= unitMinutes(nextUnit) * 0.6;
-  return { minutes, cards, reviewMinutes, dueTotal: due.length, unit: fits ? nextUnit : undefined, unitMinutes: nextUnit ? unitMinutes(nextUnit) : 0 };
+  return { minutes, cards, reviewMinutes, dueTotal: due.length, words, unit: fits ? nextUnit : undefined, unitMinutes: nextUnit ? unitMinutes(nextUnit) : 0 };
 }

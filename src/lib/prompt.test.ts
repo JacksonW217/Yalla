@@ -34,6 +34,13 @@ describe('tutor message', () => {
     expect(weak).not.toContain('ahlan (');
   });
 
+  it('lists core words learned so far, and only those', () => {
+    const m = buildSessionMessage({ scenario: SCENARIOS[0], minutes: 10, done: new Set(), cards: [], date, coreLearned: 3 });
+    expect(m).toContain('CORE WORDS I KNOW (3): wi = and; fi = in / at; fiih = there is / there are');
+    expect(m).not.toContain('mafiish');
+    expect(m).not.toContain('start from zero');
+  });
+
   it('includes formal words once a reading lesson is done', () => {
     const m = buildSessionMessage({ scenario: SCENARIOS[4], minutes: 10, done: new Set(['lesson:read1']), cards: [], date });
     expect(m).toContain('Formal words I can read: بَاب');

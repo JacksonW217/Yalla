@@ -41,6 +41,8 @@ before changing anything.
 | `src/data/letters.ts` | The 28 letters in 7 shape groups, vowel marks, extras |
 | `src/data/lessons.ts` | First Egyptian lessons, formal reading lessons, `PATH` (lesson order) |
 | `src/data/egyptian2.ts` | More Egyptian lessons |
+| `src/data/egyptian3.ts` | Verb lessons (now / want-can-must / past / future), numbers to 100, gym and work |
+| `src/data/core.ts` | Core vocabulary: common everyday words, each with an example sentence |
 | `src/data/dialogues.ts` | Scripted conversations for role-play |
 | `src/data/tutor.ts` | Instructions and scenarios for the Claude tutor chat |
 | `src/lib/srs.ts` | Spaced-repetition scheduler (SM-2 style, day-based) |
@@ -63,6 +65,15 @@ before changing anything.
   tomorrow; `syncCards` backfills on startup. Card ids are `<kind>:<ref>` and
   phrase/letter ids are stable keys in saved progress: **never rename an id**.
   Adding phrases to an existing lesson is safe (cards are backfilled).
+- **Core words** (`core.ts`) are introduced a few per day (Settings → New core
+  words per day, default 5), not by finishing a lesson. `kv` keys `core:learned`
+  (a pointer into the array) and `core:<day>` track progress, so **only append
+  to `CORE`; never reorder or remove entries**. The owner chose 5 a day and
+  grammar taught through examples with one or two plain lines of explanation.
+  The list is hand-built from common words, not from a ranked frequency corpus;
+  the app must not claim otherwise.
+- The owner's interests for vocabulary: general conversation, and gym, sports,
+  work and money.
 - New lessons go in `PATH`; tests check every lesson is on the path exactly once.
 - Letter shapes are produced with zero-width joiners (`form()`), not hard-coded
   presentation forms.
@@ -76,8 +87,9 @@ before changing anything.
 
 - Audio uses the device's standard Arabic voice, not an Egyptian accent, so
   there are deliberately no listening drills.
-- Content covers roughly the first several weeks. Natural next steps: numbers
-  11–100 and prices, basic verbs with past/future, more conversations.
+- Content now covers greetings through basic past/future verbs, numbers to
+  100 and 90 core words. Natural next steps: more core words (append), more
+  verbs and conversations, typing practice for core words.
 - No dark mode yet.
 - A second careful review of all Arabic was done on 2026-11-16, but it was by
   the same author, not a native speaker. The in-app flag button collects things
