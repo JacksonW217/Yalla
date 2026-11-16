@@ -4,7 +4,8 @@ import { Quiz } from '../components/Quiz';
 import { DoneCard, UnitShell } from '../components/UnitShell';
 import { Ar, Check, Guide, SpeakButton } from '../components/ui';
 import { LESSON_MAP, type Phrase } from '../data/lessons';
-import { markDone, record } from '../lib/db';
+import { markDone } from '../lib/cards';
+import { record } from '../lib/db';
 import { lessonQuestions } from '../lib/questions';
 import { shuffle } from '../lib/util';
 

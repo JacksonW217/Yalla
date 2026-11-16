@@ -5,11 +5,13 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { registerSW } from 'virtual:pwa-register';
 import App from './App';
+import { syncCards } from './lib/cards';
 import { requestPersistence } from './lib/db';
 import './styles.css';
 
 registerSW({ immediate: true });
 void requestPersistence();
+void syncCards();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

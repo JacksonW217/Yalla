@@ -1,9 +1,12 @@
 import { BookOpen, Check, ChevronRight, MessageCircle, PenLine } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useMemo } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Ar, Page, ProgressBar } from '../components/ui';
 import { LETTER_GROUPS } from '../data/letters';
 import { LESSON_MAP, PATH, unitKey, type Unit } from '../data/lessons';
-import { useDone } from '../lib/hooks';
+import { buildPlan } from '../lib/cards';
+import { useCards, useDone, useSettings, useToday } from '../lib/hooks';
+import { addDays, dayKey, isDue } from '../lib/srs';
 
 function describe(u: Unit) {
   if (u.kind === 'letters') {
@@ -15,11 +18,22 @@ function describe(u: Unit) {
   return { to: `/lesson/${l.id}`, title: l.title, sub: l.blurb, tag: 'Speak · Egyptian', icon: <MessageCircle size={18} />, minutes: l.minutes };
 }
 
+export const unitLink = (u: Unit) => describe(u).to;
+
 export default function Learn() {
+  const nav = useNavigate();
   const done = useDone();
-  if (!done) return <Page><div className="spinner" /></Page>;
-  const next = PATH.find((u) => !done.has(unitKey(u)));
+  const cards = useCards();
+  const today = useToday();
+  const [settings, setSettings] = useSettings();
+  const minutes = settings.minutes;
+  const next = done && PATH.find((u) => !done.has(unitKey(u)));
+  const due = useMemo(() => (cards ?? []).filter((c) => isDue(c)), [cards]);
+  const plan = useMemo(() => buildPlan(minutes, due, next || undefined), [minutes, due, next]);
+  if (!done || !cards) return <Page><div className="spinner" /></Page>;
   const count = PATH.filter((u) => done.has(unitKey(u))).length;
+  const tomorrow = cards.filter((c) => c.due === addDays(dayKey(), 1)).length;
+  const start = () => nav(plan.cards.length ? `/review?m=${minutes}` : next ? describe(next).to : '/');
 
   return (
     <Page>
@@ -30,27 +44,39 @@ export default function Learn() {
         <p className="sub">Reading and writing in formal Arabic, speaking in Egyptian.</p>
       </header>
 
+      <section className="card next">
+        <div className="row between">
+          <div className="eyebrow on-accent">Today’s session</div>
+          {today && today.reviews > 0 && <div className="foot on-accent">{today.reviews} reviewed today</div>}
+        </div>
+        <div className="seg on-dark" role="tablist" aria-label="Session length">
+          {[5, 10, 20, 30].map((m) => (
+            <button key={m} role="tab" aria-selected={m === minutes} className={m === minutes ? 'on' : ''} onClick={() => setSettings({ minutes: m })}>{m} min</button>
+          ))}
+        </div>
+        <ol className="plan">
+          {plan.cards.length > 0 && (
+            <li><b>Review {plan.cards.length} card{plan.cards.length === 1 ? '' : 's'}</b><span>about {plan.reviewMinutes} min{plan.dueTotal > plan.cards.length ? ` · ${plan.dueTotal - plan.cards.length} more due` : ''}</span></li>
+          )}
+          {plan.unit && (
+            <li><b>New: {describe(plan.unit).title}</b><span>{describe(plan.unit).tag} · about {plan.unitMinutes} min</span></li>
+          )}
+          {!plan.cards.length && !plan.unit && (
+            <li><b>{next ? 'Reviews only at this length' : 'You’re all caught up'}</b><span>{next ? (due.length ? 'Pick a longer session to add a new lesson.' : `Nothing is due. Pick 10 minutes or more for the next lesson${tomorrow ? `; ${tomorrow} cards are due tomorrow` : ''}.`) : tomorrow ? `${tomorrow} cards are due tomorrow.` : 'No cards are due.'}</span></li>
+          )}
+        </ol>
+        {(plan.cards.length > 0 || plan.unit) && (
+          <button className="btn white" onClick={start}>{count === 0 && !plan.cards.length ? 'Begin' : 'Start'} <ChevronRight size={18} /></button>
+        )}
+      </section>
+
       <section className="card">
         <div className="row between">
           <div className="eyebrow">Your path</div>
-          <div className="foot">{count} of {PATH.length} done</div>
+          <div className="foot">{count} of {PATH.length} lessons · {cards.length} cards</div>
         </div>
         <ProgressBar value={count / PATH.length} />
       </section>
-
-      {next ? (
-        <Link to={describe(next).to} className="card next">
-          <div className="eyebrow on-accent">{count === 0 ? 'Start here' : 'Up next'} · about {describe(next).minutes} min</div>
-          <div className="title">{describe(next).title}</div>
-          <div className="sub on-accent">{describe(next).sub}</div>
-          <span className="btn white">{count === 0 ? 'Begin' : 'Continue'} <ChevronRight size={18} /></span>
-        </Link>
-      ) : (
-        <section className="card">
-          <div className="title">You’ve finished every lesson so far</div>
-          <p className="sub">Go back over any unit below to keep it fresh. More lessons and scheduled review are coming next.</p>
-        </section>
-      )}
 
       <section className="section">
         <h2>All lessons</h2>

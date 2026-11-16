@@ -3,7 +3,7 @@ import { Quiz } from '../components/Quiz';
 import { DoneCard, UnitShell } from '../components/UnitShell';
 import { Ar, SpeakButton } from '../components/ui';
 import { EXTRAS, MARKS } from '../data/letters';
-import { markDone } from '../lib/db';
+import { markDone } from '../lib/cards';
 import { markQuestions } from '../lib/questions';
 
 export function MarksReference() {

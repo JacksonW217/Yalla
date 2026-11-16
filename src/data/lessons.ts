@@ -188,3 +188,5 @@ export const PATH: Unit[] = [
 ];
 
 export const unitKey = (u: Unit) => `${u.kind}:${u.id}`;
+
+export const PHRASE_MAP: Record<string, Phrase> = Object.fromEntries(LESSONS.flatMap((l) => l.phrases.map((p) => [p.id, p])));

@@ -5,6 +5,7 @@ import Learn from './screens/Learn';
 import LessonScreen from './screens/LessonScreen';
 import LettersUnit from './screens/LettersUnit';
 import MarksUnit from './screens/MarksUnit';
+import Review from './screens/Review';
 import Settings from './screens/Settings';
 
 function Tabs() {
@@ -34,6 +35,7 @@ export default function App() {
         </Route>
         <Route path="/letters/:id" element={<LettersUnit />} />
         <Route path="/marks" element={<MarksUnit />} />
+        <Route path="/review" element={<Review />} />
         <Route path="/lesson/:id" element={<LessonScreen />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

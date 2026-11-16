@@ -1,5 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, DEFAULT_SETTINGS, setKV, type Settings } from './db';
+import { dayKey } from './srs';
 
 export function useSettings(): [Settings, (patch: Partial<Settings>) => void] {
   const row = useLiveQuery(() => db.kv.get('settings'), []);
@@ -17,4 +18,13 @@ export function useDone(): Set<string> | undefined {
 
 export function useStats() {
   return useLiveQuery(async () => Object.fromEntries((await db.stats.toArray()).map((s) => [s.id, s])), []);
+}
+
+/** All cards, or undefined while loading. */
+export function useCards() {
+  return useLiveQuery(() => db.cards.toArray(), []);
+}
+
+export function useToday() {
+  return useLiveQuery(async () => ((await db.kv.get(`day:${dayKey()}`))?.value as { reviews: number } | undefined) ?? { reviews: 0 }, []);
 }
