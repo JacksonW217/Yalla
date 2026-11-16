@@ -76,6 +76,19 @@ export default function Settings() {
       <PageHeader title="Settings" back="/" gear={false} />
 
       <section className="section">
+        <h2>About you</h2>
+        <div className="card">
+          <div className="row between">
+            <div>
+              <div className="li-title">I am a</div>
+              <div className="foot">Some Arabic words change with who is speaking. This shows you the right form.</div>
+            </div>
+            <Segmented value={s.gender || 'none'} onChange={(v) => set({ gender: v === 'none' ? '' : (v as 'm' | 'f') })} options={[{ value: 'm', label: 'Man' }, { value: 'f', label: 'Woman' }, { value: 'none', label: 'Not set' }]} />
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
         <h2>Reading help</h2>
         <div className="card">
           <div className="row between">

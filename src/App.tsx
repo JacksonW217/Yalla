@@ -1,6 +1,8 @@
 import { Dumbbell, GraduationCap, MessageCircle, Sun } from 'lucide-react';
 import { NavLink, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import Alphabet, { LetterScreen } from './screens/Alphabet';
+import DialogueScreen from './screens/DialogueScreen';
+import TypeDrill from './screens/TypeDrill';
 import LessonScreen from './screens/LessonScreen';
 import Lessons from './screens/Lessons';
 import LettersUnit from './screens/LettersUnit';
@@ -44,6 +46,8 @@ export default function App() {
         <Route path="/letters/:id" element={<LettersUnit />} />
         <Route path="/marks" element={<MarksUnit />} />
         <Route path="/review" element={<Review />} />
+        <Route path="/dialogue/:id" element={<DialogueScreen />} />
+        <Route path="/type" element={<TypeDrill />} />
         <Route path="/lesson/:id" element={<LessonScreen />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

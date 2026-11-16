@@ -1,7 +1,7 @@
-import { BookOpen, ChevronRight, Languages, MessageCircle, PenLine, Repeat } from 'lucide-react';
+import { BookOpen, ChevronRight, Keyboard, Languages, MessageCircle, PenLine, Repeat, Target } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Page, PageHeader } from '../components/ui';
-import type { CardKind } from '../lib/db';
+import type { Card, CardKind } from '../lib/db';
 import { useCards } from '../lib/hooks';
 import { isDue } from '../lib/srs';
 
@@ -10,6 +10,9 @@ export const DRILLS: Record<string, { title: string; desc: string; kinds: CardKi
   read: { title: 'Read letters and words', desc: 'Recognise letters, vowel marks and words.', kinds: ['letter-read', 'mark-read', 'phrase-read'] },
   say: { title: 'Say phrases', desc: 'See the English, say it in Arabic.', kinds: ['phrase-say'] },
 };
+/** A card you've forgotten at least once, or missed and not yet recovered. */
+export const isWeak = (c: Card) => c.lapses > 0 || (!!c.last && c.reps === 0);
+
 const ICON = { write: <PenLine size={18} />, read: <BookOpen size={18} />, say: <MessageCircle size={18} /> };
 
 /** Extra practice on top of the daily session, plus the alphabet chart. */
@@ -17,6 +20,7 @@ export default function Practice() {
   const cards = useCards();
   if (!cards) return <Page><div className="spinner" /></Page>;
   const due = cards.filter((c) => isDue(c)).length;
+  const weak = cards.filter(isWeak).length;
   return (
     <Page>
       <PageHeader title="Practice" sub="Extra practice whenever you want it. Only material from lessons you’ve finished shows up here." />
@@ -54,6 +58,25 @@ export default function Practice() {
             );
             return n ? <Link key={id} to={`/review?practice=${id}`} className="li">{row}</Link> : <div key={id} className="li dim">{row}</div>;
           })}
+        </div>
+        <div className="list" style={{ marginTop: 12 }}>
+          {weak > 0 ? (
+            <Link to="/review?practice=weak" className="li">
+              <span className="li-ic next"><Target size={18} /></span>
+              <span className="grow"><span className="li-title">Trouble spots</span><span className="foot">{weak} card{weak === 1 ? '' : 's'} you’ve been missing</span></span>
+              <ChevronRight size={18} className="chev" />
+            </Link>
+          ) : (
+            <div className="li dim">
+              <span className="li-ic"><Target size={18} /></span>
+              <span className="grow"><span className="li-title">Trouble spots</span><span className="foot">Cards you miss in reviews collect here.</span></span>
+            </div>
+          )}
+          <Link to="/type" className="li">
+            <span className="li-ic"><Keyboard size={18} /></span>
+            <span className="grow"><span className="li-title">Type in Arabic</span><span className="foot">Type letters and words on the Arabic keyboard.</span></span>
+            <ChevronRight size={18} className="chev" />
+          </Link>
         </div>
         <p className="foot" style={{ margin: '10px 4px 0' }}>Free practice doesn’t change when your cards are next due.</p>
       </section>

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { form, LETTER_GROUPS, LETTER_MAP, LETTERS, MARKS } from './letters';
-import { LESSON_MAP, LESSONS, PATH, unitKey } from './lessons';
+import { DIALOGUES } from './dialogues';
+import { LESSON_MAP, LESSONS, mine, PATH, PHRASE_MAP, unitKey } from './lessons';
 
 const ARABIC = /[؀-ۿ]/;
 
@@ -59,5 +60,34 @@ describe('lessons', () => {
     }
     expect(PATH.filter((u) => u.kind === 'letters')).toHaveLength(LETTER_GROUPS.length);
     expect(PATH.filter((u) => u.kind === 'lesson')).toHaveLength(LESSONS.length);
+  });
+});
+
+describe('conversations', () => {
+  it('depend only on real speaking lessons and have both parts', () => {
+    expect(new Set(DIALOGUES.map((d) => d.id)).size).toBe(DIALOGUES.length);
+    for (const d of DIALOGUES) {
+      expect(d.requires.length).toBeGreaterThan(0);
+      for (const r of d.requires) {
+        expect(LESSON_MAP[r], `${d.id} requires ${r}`).toBeDefined();
+        expect(LESSON_MAP[r].kind).toBeUndefined();
+      }
+      expect(d.lines.some((l) => l.who === 'you')).toBe(true);
+      expect(d.lines.some((l) => l.who === 'them')).toBe(true);
+      for (const l of d.lines) {
+        expect(ARABIC.test(l.ar)).toBe(true);
+        expect(ARABIC.test(l.guide)).toBe(false);
+      }
+    }
+  });
+});
+
+describe('speaker forms', () => {
+  it('gives a woman the feminine form only for phrases about herself', () => {
+    expect(mine(PHRASE_MAP.kwayyis, 'f').guide).toBe('kwayyisa');
+    expect(mine(PHRASE_MAP.kwayyis, 'm').guide).toBe('kwayyis');
+    expect(mine(PHRASE_MAP.kwayyis, '').guide).toBe('kwayyis');
+    expect(mine(PHRASE_MAP.ezzayyak, 'f').guide).toBe('ezzayyak?'); // depends on the listener, not the speaker
+    expect(mine(PHRASE_MAP['3aayez'], 'f').guide).toBe('ana 3ayza ...');
   });
 });

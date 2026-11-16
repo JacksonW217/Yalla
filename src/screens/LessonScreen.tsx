@@ -4,7 +4,8 @@ import { Quiz } from '../components/Quiz';
 import { DoneCard, UnitShell } from '../components/UnitShell';
 import { Ar, Check, Guide, SpeakButton } from '../components/ui';
 import { FlagButton } from '../components/FlagButton';
-import { LESSON_MAP, stripMarks, type Phrase } from '../data/lessons';
+import { LESSON_MAP, mine, stripMarks, type Phrase } from '../data/lessons';
+import { useSettings } from '../lib/hooks';
 import { markDone } from '../lib/cards';
 import { record } from '../lib/db';
 import { lessonQuestions } from '../lib/questions';
@@ -60,6 +61,7 @@ function PhraseCard({ p }: { p: Phrase }) {
 function Recall({ phrases, reading, onDone }: { phrases: Phrase[]; reading?: boolean; onDone: () => void }) {
   // Reading lessons go round twice: first with vowel marks, then without.
   const [pass, setPass] = useState(1);
+  const [settings] = useSettings();
   const [queue, setQueue] = useState(() => shuffle(phrases));
   const [shown, setShown] = useState(false);
   const [cleared, setCleared] = useState(0);
@@ -104,10 +106,10 @@ function Recall({ phrases, reading, onDone }: { phrases: Phrase[]; reading?: boo
         )}
         {shown ? (
           <div className="recall-answer">
-            {reading ? <div className="quiz-word">{p.en}</div> : <Ar className="phrase-ar">{p.ar}</Ar>}
-            <div className="guide">{p.guide}</div>
-            {p.f && <div className="foot">{p.self ? 'If you’re a woman' : 'To a woman'}: {p.f.guide}</div>}
-            <SpeakButton text={p.ar} label="Hear it" />
+            {reading ? <div className="quiz-word">{p.en}</div> : <Ar className="phrase-ar">{mine(p, settings.gender).ar}</Ar>}
+            <div className="guide">{mine(p, settings.gender).guide}</div>
+            {p.f && !(p.self && settings.gender) && <div className="foot">{p.self ? 'If you’re a woman' : 'To a woman'}: {p.f.guide}</div>}
+            <SpeakButton text={mine(p, settings.gender).ar} label="Hear it" />
           </div>
         ) : (
           <p className="sub">{reading ? 'Sound it out letter by letter before you look.' : 'Try to say it before you look. Trying first is what makes it stick, even when you get it wrong.'}</p>

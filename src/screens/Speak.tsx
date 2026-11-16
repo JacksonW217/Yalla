@@ -4,7 +4,7 @@ import { Page, PageHeader, Segmented } from '../components/ui';
 import { SCENARIOS, TUTOR_INSTRUCTIONS } from '../data/tutor';
 import { copyText } from '../lib/clipboard';
 import { db, setKV } from '../lib/db';
-import { useCards, useDone } from '../lib/hooks';
+import { useCards, useDone, useSettings } from '../lib/hooks';
 import { buildSessionMessage, weakPhraseIds } from '../lib/prompt';
 import { useLiveQuery } from 'dexie-react-hooks';
 
@@ -28,14 +28,15 @@ export default function Speak() {
   const done = useDone();
   const cards = useCards();
   const setup = useLiveQuery(async () => !!(await db.kv.get('tutorSetup'))?.value, []);
+  const [settings] = useSettings();
   const [scenario, setScenario] = useState(SCENARIOS[0].id);
   const [minutes, setMinutes] = useState('10');
   const [showSetup, setShowSetup] = useState(false);
   const [preview, setPreview] = useState(false);
 
   const message = useMemo(
-    () => (done && cards ? buildSessionMessage({ scenario: SCENARIOS.find((s) => s.id === scenario)!, minutes: Number(minutes), done, cards }) : ''),
-    [done, cards, scenario, minutes],
+    () => (done && cards ? buildSessionMessage({ scenario: SCENARIOS.find((s) => s.id === scenario)!, minutes: Number(minutes), done, cards, gender: settings.gender }) : ''),
+    [done, cards, scenario, minutes, settings.gender],
   );
   if (!done || !cards || setup === undefined) return <Page><div className="spinner" /></Page>;
   const weak = weakPhraseIds(cards).length;

@@ -10,6 +10,8 @@
  *   which case they depend on who is SPEAKING.
  */
 
+import { MORE_EGYPTIAN } from './egyptian2';
+
 export interface Phrase {
   id: string;
   ar: string;
@@ -258,7 +260,7 @@ export const READING: Lesson[] = [
   },
 ];
 
-LESSONS.push(...READING);
+LESSONS.push(...READING, ...MORE_EGYPTIAN);
 
 export const LESSON_MAP: Record<string, Lesson> = Object.fromEntries(LESSONS.map((l) => [l.id, l]));
 
@@ -278,13 +280,20 @@ export const PATH: Unit[] = [
   { kind: 'lesson', id: 'read1' },
   { kind: 'lesson', id: 'polite' },
   { kind: 'letters', id: 'g4' },
+  { kind: 'lesson', id: 'people' },
   { kind: 'letters', id: 'g5' },
   { kind: 'lesson', id: 'questions' },
+  { kind: 'lesson', id: 'wants' },
   { kind: 'letters', id: 'g6' },
+  { kind: 'lesson', id: 'food' },
   { kind: 'letters', id: 'g7' },
   { kind: 'lesson', id: 'read2' },
   { kind: 'lesson', id: 'numbers' },
+  { kind: 'lesson', id: 'family' },
+  { kind: 'lesson', id: 'around' },
   { kind: 'lesson', id: 'read3' },
+  { kind: 'lesson', id: 'time' },
+  { kind: 'lesson', id: 'smalltalk' },
 ];
 
 export const unitKey = (u: Unit) => `${u.kind}:${u.id}`;
@@ -296,3 +305,11 @@ export const PHRASE_LESSON: Record<string, Lesson> = Object.fromEntries(LESSONS.
 
 /** Remove short-vowel marks, the way everyday Arabic is printed. */
 export const stripMarks = (ar: string) => ar.replace(/[\u064B-\u0652\u0670]/g, '');
+
+/**
+ * The form of a phrase the learner should say themselves: for phrases that
+ * depend on the speaker (`self`), a woman uses the feminine variant.
+ */
+export function mine(p: Phrase, gender: '' | 'm' | 'f'): { ar: string; guide: string } {
+  return p.self && p.f && gender === 'f' ? p.f : { ar: p.ar, guide: p.guide };
+}

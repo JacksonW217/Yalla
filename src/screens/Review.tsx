@@ -11,7 +11,7 @@ import { useDone } from '../lib/hooks';
 import { dayKey } from '../lib/srs';
 import { unitLink } from '../lib/units';
 import { shuffle } from '../lib/util';
-import { DRILLS } from './Practice';
+import { DRILLS, isWeak } from './Practice';
 
 /** A review session: the due cards for today's time budget, one at a time. */
 export default function Review() {
@@ -19,7 +19,8 @@ export default function Review() {
   const [params] = useSearchParams();
   const minutes = Number(params.get('m')) || 10;
   /** Free practice: a drill of one kind of card that leaves the schedule untouched. */
-  const drill = DRILLS[params.get('practice') ?? ''];
+  const which = params.get('practice') ?? '';
+  const drill = which === 'weak' ? { title: 'Trouble spots', desc: '', kinds: [] } : DRILLS[which];
   const done = useDone();
   const [plan, setPlan] = useState<Plan>();
   const [queue, setQueue] = useState<Card[]>([]);
@@ -33,7 +34,7 @@ export default function Review() {
     if (!done || plan) return;
     void (async () => {
       if (drill) {
-        const pool = shuffle((await db.cards.toArray()).filter((c) => drill.kinds.includes(c.kind))).slice(0, 12);
+        const pool = shuffle((await db.cards.toArray()).filter((c) => (which === 'weak' ? isWeak(c) : drill.kinds.includes(c.kind)))).slice(0, 12);
         setPlan({ minutes: 0, cards: pool, reviewMinutes: 0, dueTotal: pool.length, unitMinutes: 0 });
         setQueue(pool);
         return;
@@ -44,7 +45,7 @@ export default function Review() {
       setPlan(p);
       setQueue(p.cards);
     })();
-  }, [done, plan, minutes, drill]);
+  }, [done, plan, minutes, which]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const known = useMemo(() => LETTER_GROUPS.filter((g) => done?.has(`letters:${g.id}`)).flatMap((g) => g.letters.map((id) => LETTER_MAP[id])), [done]);
 

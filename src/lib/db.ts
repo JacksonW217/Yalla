@@ -49,8 +49,10 @@ export interface Settings {
   rate: number;
   /** Preferred daily session length. */
   minutes: number;
+  /** Who is speaking, so phrases about yourself use the right form. '' = not set. */
+  gender: '' | 'm' | 'f';
 }
-export const DEFAULT_SETTINGS: Settings = { showGuide: true, rate: 0.8, minutes: 20 };
+export const DEFAULT_SETTINGS: Settings = { showGuide: true, rate: 0.8, minutes: 20, gender: '' };
 
 export async function requestPersistence() {
   try {

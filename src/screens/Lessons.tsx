@@ -1,7 +1,8 @@
-import { Check, ChevronRight } from 'lucide-react';
+import { Check, ChevronRight, Lock, MessagesSquare } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Page, PageHeader, ProgressBar } from '../components/ui';
-import { PATH, unitKey } from '../data/lessons';
+import { DIALOGUES } from '../data/dialogues';
+import { LESSON_MAP, PATH, unitKey } from '../data/lessons';
 import { useDone } from '../lib/hooks';
 import { describe, type Skill } from '../lib/units';
 
@@ -50,6 +51,30 @@ export default function Lessons() {
           </section>
         );
       })}
+      <section className="section">
+        <div className="row between group-head">
+          <h2>Conversations</h2>
+          <span className="foot">{DIALOGUES.filter((d) => done.has(`dialogue:${d.id}`)).length} of {DIALOGUES.length}</span>
+        </div>
+        <p className="sub group-sub">Short scripted conversations. Read one through, then play your part from memory.</p>
+        <div className="list" style={{ marginTop: 12 }}>
+          {DIALOGUES.map((d) => {
+            const missing = d.requires.filter((r) => !done.has(`lesson:${r}`));
+            const isDone = done.has(`dialogue:${d.id}`);
+            const body = (
+              <>
+                <span className={`li-ic${isDone ? ' ok' : ''}`}>{isDone ? <Check size={18} /> : missing.length ? <Lock size={16} /> : <MessagesSquare size={18} />}</span>
+                <span className="grow">
+                  <span className="li-title">{d.title}</span>
+                  <span className="foot">{missing.length ? `After: ${missing.map((r) => LESSON_MAP[r].title).join(', ')}` : `${d.lines.length} lines${isDone ? ' · done' : ''}`}</span>
+                </span>
+                {!missing.length && <ChevronRight size={18} className="chev" />}
+              </>
+            );
+            return missing.length ? <div key={d.id} className="li dim">{body}</div> : <Link key={d.id} to={`/dialogue/${d.id}`} className="li">{body}</Link>;
+          })}
+        </div>
+      </section>
     </Page>
   );
 }

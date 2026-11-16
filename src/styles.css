@@ -309,3 +309,20 @@ html, body { overflow-x: clip; }
 .li-ic.next { background: var(--gold-soft); color: var(--gold); box-shadow: 0 0 0 1.5px #e6cf9b; }
 .li.dim { opacity: 0.55; }
 .li:not(:has(.li-ic)) + .li::before, .li:not(:has(.li-ic))::before { left: 14px; }
+
+/* Conversations */
+.chat { display: flex; flex-direction: column; gap: 10px; }
+.bubble { max-width: 88%; border-radius: 18px; padding: 10px 14px 12px; border: 1px solid var(--line); background: var(--card); }
+.bubble.theirs { align-self: flex-start; border-bottom-left-radius: 6px; }
+.bubble.mine { align-self: flex-end; background: var(--accent-soft); border-color: #b8dcd3; border-bottom-right-radius: 6px; }
+.bubble-who { font-size: 12px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.05em; }
+.bubble-ar { display: block; font-size: 26px; line-height: 1.6; text-align: left; }
+.bubble-en { font-size: 14.5px; color: var(--ink-2); margin-top: 4px; }
+.bubble-new { font-size: 13px; color: #6b4d10; background: var(--gold-soft); border-radius: 8px; padding: 4px 8px; margin-top: 6px; display: inline-block; }
+.bubble .btn { margin-top: 8px; }
+
+/* Typing */
+.type-input { width: 100%; font-family: 'Noto Naskh Arabic', 'Geeza Pro', serif; font-size: 34px; line-height: 1.6; text-align: center; border: 1.5px solid var(--line); background: var(--card); border-radius: 16px; padding: 10px 12px; outline: none; }
+.type-input:focus { border-color: var(--accent); }
+.type-input.right { border-color: var(--good); background: var(--good-soft); }
+.type-input.wrong { border-color: var(--bad); background: var(--bad-soft); }

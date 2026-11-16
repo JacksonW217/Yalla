@@ -10,6 +10,7 @@ export interface PromptInput {
   done: Set<string>;
   cards: Card[];
   date?: Date;
+  gender?: '' | 'm' | 'f';
 }
 
 const line = (p: Phrase) => `- ${p.guide} (${p.ar}) = ${p.en}${p.f ? ` [to/for a woman: ${p.f.guide}]` : ''}`;
@@ -30,7 +31,7 @@ export function weakPhraseIds(cards: Card[]): string[] {
  * The message to paste into the Claude tutor chat. It lists only what the
  * learner has actually finished in the app, so the tutor stays at their level.
  */
-export function buildSessionMessage({ scenario, minutes, done, cards, date = new Date() }: PromptInput): string {
+export function buildSessionMessage({ scenario, minutes, done, cards, date = new Date(), gender = '' }: PromptInput): string {
   const learned = LESSONS.filter((l) => done.has(`lesson:${l.id}`));
   const spoken = learned.filter((l) => l.kind !== 'reading');
   const formal = learned.filter((l) => l.kind === 'reading');
@@ -42,6 +43,7 @@ export function buildSessionMessage({ scenario, minutes, done, cards, date = new
   out.push(`Arabic practice — ${date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}`);
   out.push('');
   out.push(`Today, for about ${minutes} minutes: ${scenario.ask}`);
+  if (gender) out.push(`I'm a ${gender === 'f' ? 'woman' : 'man'}, so use the ${gender === 'f' ? 'feminine' : 'masculine'} forms when you talk to me and teach me the forms a ${gender === 'f' ? 'woman' : 'man'} says about ${gender === 'f' ? 'herself' : 'himself'}.`);
   out.push('');
   if (spoken.length) {
     out.push('EGYPTIAN PHRASES I’VE LEARNED (stay within these; add at most 2-3 new words):');
