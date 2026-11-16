@@ -151,6 +151,7 @@ export const MARKS: Mark[] = [
   { id: 'Damma', sample: 'بُ', name: 'Damma', guide: 'bu', explain: 'A tiny و above the letter. Adds a short "u".' },
   { id: 'sukuun', sample: 'بْ', name: 'sukuun', guide: 'b', explain: 'A small circle above the letter. It means no vowel follows.' },
   { id: 'shadda', sample: 'بّ', name: 'shadda', guide: 'bb', explain: 'A small w shape above the letter. Hold the letter twice as long.' },
+  { id: 'tanwiin', sample: 'بًا', name: 'tanwiin', guide: 'ban', explain: 'Two dashes above, usually with an ا after. Adds “an” at the end of a word, as in shukran (شكرًا) and ahlan (أهلًا).' },
   { id: 'long-a', sample: 'با', name: 'long aa', guide: 'baa', explain: 'A letter followed by ا makes a long "aa".' },
   { id: 'long-u', sample: 'بو', name: 'long uu', guide: 'buu', explain: 'A letter followed by و makes a long "oo".' },
   { id: 'long-i', sample: 'بي', name: 'long ii', guide: 'bii', explain: 'A letter followed by ي makes a long "ee".' },
