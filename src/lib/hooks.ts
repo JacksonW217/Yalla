@@ -28,3 +28,13 @@ export function useCards() {
 export function useToday() {
   return useLiveQuery(async () => ((await db.kv.get(`day:${dayKey()}`))?.value as { reviews: number } | undefined) ?? { reviews: 0 }, []);
 }
+
+/** Content the learner flagged as possibly wrong: phrase id → note. */
+export function useFlags(): Record<string, string> {
+  return (
+    useLiveQuery(async () => {
+      const rows = await db.kv.where('key').startsWith('flag:').toArray();
+      return Object.fromEntries(rows.map((r) => [r.key.slice(5), String(r.value ?? '')]));
+    }, []) ?? {}
+  );
+}

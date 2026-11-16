@@ -24,11 +24,15 @@ export interface Phrase {
   note?: string;
   /** Formal (Modern Standard) equivalent, when it differs. */
   formal?: { ar: string; guide: string };
+  /** How Egyptians say it, for formal words that differ in everyday speech. */
+  egypt?: string;
   /** Author is not fully confident: verify with a second source. */
   check?: boolean;
 }
 
 export interface Lesson {
+  /** 'reading' lessons are formal Arabic, printed with vowel marks that fade as you learn. */
+  kind?: 'reading';
   id: string;
   title: string;
   blurb: string;
@@ -163,6 +167,99 @@ export const LESSONS: Lesson[] = [
   },
 ];
 
+
+const W = (id: string, ar: string, guide: string, en: string, egypt?: string, extra: Partial<Phrase> = {}): Phrase => ({ id, ar, guide, en, egypt, ...extra });
+
+/**
+ * Formal Arabic reading lessons. Words are fully vowelled here; the app strips
+ * the marks itself once you know a word, because real Arabic is printed
+ * without them.
+ */
+export const READING: Lesson[] = [
+  {
+    kind: 'reading',
+    id: 'read1',
+    title: 'Your first words',
+    blurb: 'Read real words using only the letters you know so far.',
+    minutes: 10,
+    intro: [
+      'Every word here uses only the first eleven letters you have learned. Sound each one out, right to left, letter by letter.',
+      'These are formal Arabic words, the kind you see in print. Where everyday Egyptian says something different, you will see it noted.',
+    ],
+    phrases: [
+      W('w-baab', 'بَاب', 'baab', 'door'),
+      W('w-ab', 'أَب', 'ab', 'father'),
+      W('w-akh', 'أَخ', 'akh', 'brother'),
+      W('w-ukht', 'أُخْت', 'ukht', 'sister'),
+      W('w-bint', 'بِنْت', 'bint', 'girl, daughter', undefined, { note: 'ن is a letter you haven’t studied yet. It looks like ب with the dot on top.' }),
+      W('w-jadd', 'جَدّ', 'jadd', 'grandfather', 'gidd'),
+      W('w-7ubb', 'حُبّ', '7ubb', 'love'),
+      W('w-khubz', 'خُبْز', 'khubz', 'bread', '3eesh'),
+      W('w-ba7r', 'بَحْر', 'ba7r', 'sea'),
+      W('w-bard', 'بَرْد', 'bard', 'cold (weather)'),
+      W('w-7ajar', 'حَجَر', '7ajar', 'stone', '7agar'),
+      W('w-taaj', 'تَاج', 'taaj', 'crown', 'taag'),
+      W('w-dajaaj', 'دَجَاج', 'dajaaj', 'chicken', 'firaakh'),
+    ],
+  },
+  {
+    kind: 'reading',
+    id: 'read2',
+    title: 'Everyday words',
+    blurb: 'Common nouns and describing words, with the whole alphabet.',
+    minutes: 10,
+    intro: [
+      'You now know every letter. These are some of the most common words in Arabic.',
+      'Many feminine words end in ة, which sounds like a short “a”.',
+    ],
+    phrases: [
+      W('w-kitaab', 'كِتَاب', 'kitaab', 'book'),
+      W('w-qalam', 'قَلَم', 'qalam', 'pen', '2alam'),
+      W('w-bayt', 'بَيْت', 'bayt', 'house', 'beet'),
+      W('w-maa2', 'مَاء', 'maa2', 'water', 'mayya'),
+      W('w-shams', 'شَمْس', 'shams', 'sun'),
+      W('w-qamar', 'قَمَر', 'qamar', 'moon', '2amar'),
+      W('w-walad', 'وَلَد', 'walad', 'boy'),
+      W('w-rajul', 'رَجُل', 'rajul', 'man', 'raagil'),
+      W('w-madrasa', 'مَدْرَسَة', 'madrasa', 'school'),
+      W('w-madiina', 'مَدِينَة', 'madiina', 'city'),
+      W('w-sayyaara', 'سَيَّارَة', 'sayyaara', 'car', '3arabiyya'),
+      W('w-Ta3aam', 'طَعَام', 'Ta3aam', 'food', 'akl'),
+      W('w-kabiir', 'كَبِير', 'kabiir', 'big', 'kibiir'),
+      W('w-Saghiir', 'صَغِير', 'Saghiir', 'small', 'Sughayyar'),
+      W('w-jamiil', 'جَمِيل', 'jamiil', 'beautiful', 'gamiil'),
+      W('w-jadiid', 'جَدِيد', 'jadiid', 'new', 'gidiid'),
+    ],
+  },
+  {
+    kind: 'reading',
+    id: 'read3',
+    title: 'Your first sentences',
+    blurb: 'Read short formal sentences.',
+    minutes: 10,
+    intro: [
+      'The word for “the” is ال (al-), attached to the front of the word: كِتَاب is “a book”, الكِتَاب is “the book”.',
+      'Formal Arabic, like Egyptian, has no word for “is” in simple sentences. “The house big” means “The house is big”.',
+    ],
+    phrases: [
+      W('s-mar7aban', 'مَرْحَبًا', 'mar7aban', 'Hello', 'ahlan'),
+      W('s-haadhaa-kitaab', 'هَذَا كِتَاب', 'haadhaa kitaab', 'This is a book', 'da kitaab', { note: 'هذا is said with a long “aa” after the h, even though no ا is written there.' }),
+      W('s-haadhihi-madrasa', 'هَذِهِ مَدْرَسَة', 'haadhihi madrasa', 'This is a school', 'di madrasa', { note: 'هذه is “this” for feminine words.' }),
+      W('s-ana-Taalib', 'أَنَا طَالِب', 'ana Taalib', 'I am a student'),
+      W('s-albayt-kabiir', 'البَيْت كَبِير', 'al-bayt kabiir', 'The house is big', 'el-beet kibiir'),
+      W('s-alwalad-Saghiir', 'الوَلَد صَغِير', 'al-walad Saghiir', 'The boy is small', 'el-walad Sughayyar'),
+      W('s-almadiina-jamiila', 'المَدِينَة جَمِيلَة', 'al-madiina jamiila', 'The city is beautiful', undefined, { note: 'The describing word takes ة too, to match the feminine noun.' }),
+      W('s-ayna-alkitaab', 'أَيْنَ الكِتَاب؟', 'ayna l-kitaab?', 'Where is the book?', 'el-kitaab feen?'),
+      W('s-maa-ismuka', 'مَا اسْمُكَ؟', 'maa smuka?', 'What is your name? (to a man)', 'ismak eeh?'),
+      W('s-ismii', 'اِسْمِي ...', 'ismii ...', 'My name is ...'),
+      W('s-shukran', 'شُكْرًا', 'shukran', 'Thank you'),
+      W('s-ma3a-ssalaama', 'مَعَ السَّلَامَة', 'ma3a s-salaama', 'Goodbye'),
+    ],
+  },
+];
+
+LESSONS.push(...READING);
+
 export const LESSON_MAP: Record<string, Lesson> = Object.fromEntries(LESSONS.map((l) => [l.id, l]));
 
 /**
@@ -178,15 +275,24 @@ export const PATH: Unit[] = [
   { kind: 'marks', id: 'marks' },
   { kind: 'lesson', id: 'introductions' },
   { kind: 'letters', id: 'g3' },
+  { kind: 'lesson', id: 'read1' },
   { kind: 'lesson', id: 'polite' },
   { kind: 'letters', id: 'g4' },
   { kind: 'letters', id: 'g5' },
   { kind: 'lesson', id: 'questions' },
   { kind: 'letters', id: 'g6' },
   { kind: 'letters', id: 'g7' },
+  { kind: 'lesson', id: 'read2' },
   { kind: 'lesson', id: 'numbers' },
+  { kind: 'lesson', id: 'read3' },
 ];
 
 export const unitKey = (u: Unit) => `${u.kind}:${u.id}`;
 
 export const PHRASE_MAP: Record<string, Phrase> = Object.fromEntries(LESSONS.flatMap((l) => l.phrases.map((p) => [p.id, p])));
+
+/** Phrase id → the lesson it belongs to. */
+export const PHRASE_LESSON: Record<string, Lesson> = Object.fromEntries(LESSONS.flatMap((l) => l.phrases.map((p) => [p.id, l])));
+
+/** Remove short-vowel marks, the way everyday Arabic is printed. */
+export const stripMarks = (ar: string) => ar.replace(/[\u064B-\u0652\u0670]/g, '');

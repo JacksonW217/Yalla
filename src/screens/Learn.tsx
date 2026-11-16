@@ -15,6 +15,7 @@ function describe(u: Unit) {
   }
   if (u.kind === 'marks') return { to: '/marks', title: 'Vowel marks', sub: 'The small signs that tell you which vowel to say.', tag: 'Read', icon: <BookOpen size={18} />, minutes: 5 };
   const l = LESSON_MAP[u.id];
+  if (l.kind === 'reading') return { to: `/lesson/${l.id}`, title: l.title, sub: l.blurb, tag: 'Read · Formal', icon: <BookOpen size={18} />, minutes: l.minutes };
   return { to: `/lesson/${l.id}`, title: l.title, sub: l.blurb, tag: 'Speak · Egyptian', icon: <MessageCircle size={18} />, minutes: l.minutes };
 }
 

@@ -1,7 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Ar, Page, Segmented, SpeakButton } from '../components/ui';
-import { resetAll } from '../lib/db';
-import { useSettings } from '../lib/hooks';
+import { PHRASE_MAP } from '../data/lessons';
+import { syncCards } from '../lib/cards';
+import { copyText } from '../lib/clipboard';
+import { db, exportAll, importAll, resetAll } from '../lib/db';
+import { useFlags, useSettings } from '../lib/hooks';
 import { arabicVoice, speechSupported } from '../lib/speech';
 
 const KEY: [string, string, string][] = [
@@ -25,6 +28,48 @@ export default function Settings() {
     return () => { window.removeEventListener('yalla-voices', f); clearTimeout(t); };
   }, []);
   const voice = arabicVoice();
+  const flags = useFlags();
+  const flagged = Object.entries(flags).filter(([id]) => PHRASE_MAP[id]);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [msg, setMsg] = useState('');
+
+  const flagReport = () =>
+    ['Yalla: things I flagged as possibly wrong', ...flagged.map(([id, note]) => `- ${PHRASE_MAP[id].ar} | ${PHRASE_MAP[id].guide} | ${PHRASE_MAP[id].en}${note ? ` — ${note}` : ''} (id: ${id})`)].join('\n');
+
+  const backup = async () => {
+    const blob = new Blob([JSON.stringify(await exportAll())], { type: 'application/json' });
+    const name = `yalla-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    const file = new File([blob], name, { type: 'application/json' });
+    // On iPhone the share sheet is the reliable way to save a file from a Home Screen app.
+    if (navigator.canShare?.({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: name });
+        return;
+      } catch (e) {
+        if ((e as Error).name === 'AbortError') return;
+      }
+    }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
+  const restore = async (f: File | undefined) => {
+    if (!f) return;
+    try {
+      const json = JSON.parse(await f.text());
+      if (!confirm('Replace everything on this device with this backup? Your current progress here will be overwritten.')) return;
+      await importAll(json);
+      await syncCards();
+      setMsg('Backup restored.');
+    } catch (e) {
+      setMsg(e instanceof Error && e.message.includes('Yalla') ? e.message : 'That file couldn’t be read as a Yalla backup.');
+    } finally {
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
 
   return (
     <Page>
@@ -87,9 +132,36 @@ export default function Settings() {
       </section>
 
       <section className="section">
+        <h2>Flagged as possibly wrong</h2>
+        <div className="card">
+          {flagged.length === 0 ? (
+            <p className="sub" style={{ marginTop: 0 }}>Nothing flagged. Tap the small flag on any word or phrase that looks wrong, and it will be listed here.</p>
+          ) : (
+            <>
+              {flagged.map(([id, note]) => (
+                <div key={id} className="flag-row">
+                  <div className="grow">
+                    <div><Ar>{PHRASE_MAP[id].ar}</Ar> <span className="guide">{PHRASE_MAP[id].guide}</span></div>
+                    <div className="sub">{PHRASE_MAP[id].en}</div>
+                    {note && <div className="foot">Your note: {note}</div>}
+                  </div>
+                  <button className="btn sm secondary" onClick={() => db.kv.delete(`flag:${id}`)}>Clear</button>
+                </div>
+              ))}
+              <button className="btn secondary" style={{ marginTop: 12 }} onClick={async () => setMsg((await copyText(flagReport())) ? 'List copied. Paste it to Claude to get these checked and fixed.' : 'Couldn’t copy the list.')}>Copy list to send for fixing</button>
+            </>
+          )}
+        </div>
+      </section>
+
+      <section className="section">
         <h2>Your data</h2>
         <div className="card stack">
-          <p className="sub" style={{ marginTop: 0 }}>Progress is saved on this device only.</p>
+          <p className="sub" style={{ marginTop: 0 }}>Progress is saved on this device only. Save a backup now and then, especially before getting a new phone.</p>
+          <button className="btn secondary" onClick={backup}>Save a backup file</button>
+          <button className="btn secondary" onClick={() => fileRef.current?.click()}>Restore from a backup</button>
+          <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => void restore(e.target.files?.[0])} />
+          {msg && <p className="note" role="status">{msg}</p>}
           <button className="btn danger" onClick={async () => { if (confirm('Erase all your progress on this device? This can’t be undone.')) { await resetAll(); location.href = '/'; } }}>Erase my progress</button>
         </div>
       </section>

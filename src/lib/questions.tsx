@@ -1,7 +1,7 @@
 import type { Question } from '../components/Quiz';
 import { Ar, Guide, SpeakButton } from '../components/ui';
 import { form, LETTER_GROUPS, LETTER_MAP, LETTERS, MARKS, type Letter, type Position } from '../data/letters';
-import type { Lesson } from '../data/lessons';
+import { stripMarks, type Lesson } from '../data/lessons';
 import { sample, shuffle } from './util';
 
 /** Distractors: prefer look-alikes from the same shape family, then anything else. */
@@ -85,7 +85,9 @@ export function lessonQuestions(lesson: Lesson): Question[] {
     const explain = <span><Ar>{p.ar}</Ar> · {p.guide} · {p.en}</span>;
     qs.push({
       itemId: `phrase:${p.id}`,
-      prompt: (<><div className="quiz-ask">What does this mean?</div><Ar className="quiz-phrase">{p.ar}</Ar><div><Guide>{p.guide}</Guide></div><SpeakButton text={p.ar} label="Hear it" /></>),
+      prompt: lesson.kind === 'reading'
+        ? (<><div className="quiz-ask">What does this mean?</div><Ar className="quiz-phrase">{stripMarks(p.ar)}</Ar></>)
+        : (<><div className="quiz-ask">What does this mean?</div><Ar className="quiz-phrase">{p.ar}</Ar><div><Guide>{p.guide}</Guide></div><SpeakButton text={p.ar} label="Hear it" /></>),
       options: shuffle([p, ...others]).map((x) => ({ key: x.id, label: x.en })),
       answer: p.id,
       explain,

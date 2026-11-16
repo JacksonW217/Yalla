@@ -1,4 +1,4 @@
-import { GraduationCap, Languages, Settings as SettingsIcon } from 'lucide-react';
+import { GraduationCap, Languages, MessageCircle, Settings as SettingsIcon } from 'lucide-react';
 import { NavLink, Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import Alphabet, { LetterScreen } from './screens/Alphabet';
 import Learn from './screens/Learn';
@@ -7,6 +7,7 @@ import LettersUnit from './screens/LettersUnit';
 import MarksUnit from './screens/MarksUnit';
 import Review from './screens/Review';
 import Settings from './screens/Settings';
+import Speak from './screens/Speak';
 
 function Tabs() {
   return (
@@ -15,6 +16,7 @@ function Tabs() {
       <div className="tabbar">
         <nav>
           <NavLink to="/" end><GraduationCap size={22} /><span>Learn</span></NavLink>
+          <NavLink to="/speak"><MessageCircle size={22} /><span>Speak</span></NavLink>
           <NavLink to="/alphabet"><Languages size={22} /><span>Alphabet</span></NavLink>
           <NavLink to="/settings"><SettingsIcon size={22} /><span>Settings</span></NavLink>
         </nav>
@@ -29,6 +31,7 @@ export default function App() {
       <Routes>
         <Route element={<Tabs />}>
           <Route path="/" element={<Learn />} />
+          <Route path="/speak" element={<Speak />} />
           <Route path="/alphabet" element={<Alphabet />} />
           <Route path="/alphabet/:id" element={<LetterScreen />} />
           <Route path="/settings" element={<Settings />} />

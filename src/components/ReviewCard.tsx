@@ -1,6 +1,7 @@
 import { Check as CheckIcon, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { PHRASE_MAP } from '../data/lessons';
+import { PHRASE_LESSON, PHRASE_MAP, stripMarks } from '../data/lessons';
+import { FlagButton } from './FlagButton';
 import { form, LETTER_GROUPS, LETTER_MAP, MARKS, POSITION_LABEL, POSITIONS, type Letter, type Position } from '../data/letters';
 import type { Card } from '../lib/db';
 import { inWords, review, type Grade } from '../lib/srs';
@@ -123,19 +124,22 @@ function MarkRead({ card, onGrade }: Props) {
 
 function PhraseCard({ card, onGrade, say }: Props & { say: boolean }) {
   const p = PHRASE_MAP[card.ref];
+  const formal = PHRASE_LESSON[card.ref]?.kind === 'reading';
+  // Formal words lose their vowel marks once you've got them right twice.
+  const ar = formal && card.reps >= 2 ? stripMarks(p.ar) : p.ar;
   const [shown, setShown] = useState(false);
   return (
     <div className="recall">
       <div className="card recall-card">
         {say ? (
           <>
-            <div className="quiz-ask">Say this out loud in Egyptian Arabic</div>
+            <div className="quiz-ask">Say this out loud in {formal ? 'formal' : 'Egyptian'} Arabic</div>
             <div className="quiz-word">{p.en}</div>
           </>
         ) : (
           <>
-            <div className="quiz-ask">Read this. What does it mean?</div>
-            <Ar className="quiz-phrase">{p.ar}</Ar>
+            <div className="quiz-ask">Read this out loud. What does it mean?{formal && ar !== p.ar ? ' (no vowel marks)' : ''}</div>
+            <Ar className="quiz-phrase">{ar}</Ar>
           </>
         )}
         {shown && (
@@ -143,7 +147,8 @@ function PhraseCard({ card, onGrade, say }: Props & { say: boolean }) {
             {say ? <Ar className="phrase-ar">{p.ar}</Ar> : <div className="quiz-word">{p.en}</div>}
             <div className="guide">{p.guide}</div>
             {p.f && <div className="foot">{p.self ? 'If you’re a woman' : 'To a woman'}: {p.f.guide}</div>}
-            {p.check && <div><Check /></div>}
+            {formal && p.egypt && <div className="foot">In Egypt: {p.egypt}</div>}
+            <div className="row" style={{ justifyContent: 'center' }}>{p.check && <Check />}<FlagButton id={p.id} /></div>
             <SpeakButton text={p.ar} label="Hear it" />
           </div>
         )}

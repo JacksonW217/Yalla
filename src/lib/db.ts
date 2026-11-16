@@ -67,3 +67,26 @@ export async function resetAll() {
     await db.cards.clear();
   });
 }
+
+export async function exportAll() {
+  return {
+    app: 'yalla',
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    data: { stats: await db.stats.toArray(), kv: await db.kv.toArray(), cards: await db.cards.toArray() },
+  };
+}
+
+/** Replace everything on this device with a backup file's contents. */
+export async function importAll(json: unknown) {
+  const j = json as { app?: string; data?: { stats?: Stat[]; kv?: KV[]; cards?: Card[] } };
+  if (j?.app !== 'yalla' || !j.data || !Array.isArray(j.data.kv)) throw new Error('This file is not a Yalla backup.');
+  await db.transaction('rw', db.stats, db.kv, db.cards, async () => {
+    await db.stats.clear();
+    await db.kv.clear();
+    await db.cards.clear();
+    await db.stats.bulkAdd(j.data!.stats ?? []);
+    await db.kv.bulkAdd(j.data!.kv!);
+    await db.cards.bulkAdd(j.data!.cards ?? []);
+  });
+}
